@@ -11,6 +11,7 @@ export class Stk500Service {
     const exec = util.promisify(ChildProcess.exec);
     const command = 'python C:\\inetpub\\wwwroot\\STK_clean.py'
     const { stdout, stderr } = await exec(command);
+    console.log('com',command);
     console.log('stdout:', stdout);
     console.log('stderr:', stderr);
     return stdout;
@@ -20,6 +21,7 @@ export class Stk500Service {
     const exec = util.promisify(ChildProcess.exec);
     const command = 'python C:\\inetpub\\wwwroot\\STK_but_adc.py' + ' ' + buttons +  ' ' + resistor;
     const { stdout, stderr } = await exec(command);
+    console.log('com',command);
     console.log('stdout:', stdout);
     console.log('stderr:', stderr);
     return stdout;
@@ -31,6 +33,7 @@ export class Stk500Service {
     console.log(filename);
     const command = 'python C:\\inetpub\\wwwroot\\STK_prog.py' + ' ' + filename;
     const { stdout, stderr } = await exec(command);
+    console.log('com',command);
     console.log('stdout:', stdout);
     console.log('stderr:', stderr);
     return stdout;

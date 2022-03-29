@@ -9,11 +9,7 @@ export class ButtonDTO {
   buttons: string;
 
   @ApiProperty()
-  @Transform(({value}) => {
-    return Number(value)
-  })
-  @IsNumber()
-  @Min(32)
-  @Max(4095)
+  @IsString()
+  @Matches(/[0,1]\d{4}/)
   resistor: string;
 }

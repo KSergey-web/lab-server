@@ -41,8 +41,8 @@ export class Stk500Service {
 
   async saveFile(file: Express.Multer.File): Promise<string> {
     const write = await fs.promises.writeFile(
-      `C:\\inetpub\\wwwroot\\${file.originalname}`,
-      //`./${file.originalname}`,
+  //    `C:\\inetpub\\wwwroot\\${file.originalname}`,
+      `./${file.originalname}`,
       file.buffer,
     );
     return file.originalname;

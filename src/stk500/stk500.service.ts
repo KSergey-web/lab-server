@@ -14,7 +14,7 @@ export class Stk500Service {
     console.log('com ',command);
     console.log('stdout:', stdout);
     console.log('stderr:', stderr);
-    return { stdout, stderr };
+    return await this.getLogs();
   }
 
   async button(buttons: string, resistor: string) {
@@ -24,7 +24,7 @@ export class Stk500Service {
     console.log('com ',command);
     console.log('stdout:', stdout);
     console.log('stderr:', stderr);
-    return { stdout, stderr };
+    return await this.getLogs();
   }
 
   async flashFile(file: Express.Multer.File) {
@@ -37,7 +37,7 @@ export class Stk500Service {
     console.log('com ',command);
     console.log('stdout:', stdout);
     console.log('stderr:', stderr);
-    return { stdout, stderr };
+    return await this.getLogs();
   }
 
   async reflashFile() {
@@ -50,7 +50,7 @@ export class Stk500Service {
     console.log('com ',command);
     console.log('stdout:', stdout);
     console.log('stderr:', stderr);
-    return { stdout, stderr };
+    return await this.getLogs();
   }
 
   async saveFile(file: Express.Multer.File): Promise<string> {

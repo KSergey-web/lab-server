@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import * as util from 'util'
 import * as ChildProcess from 'child_process';
 import * as fs from 'fs';
@@ -42,8 +42,10 @@ export class Stk500Service {
 
   async reflashFile() {
     const exec = util.promisify(ChildProcess.exec);
-    const { stdout: files } = await exec('dir *.m /B/o:-d');
-    const filename = files.split('\n')[0];
+    const { stdout: files} = await exec('dir *.hex /B/o:-d');
+    const arrayfiles = files.split('\n');
+    if (arrayfiles.length < 1) throw new BadRequestException('Hex file in directory is not found');
+    const filename = arrayfiles[0];
     console.log("flash file: ", filename);
     const command = 'python C:\\inetpub\\wwwroot\\STK_prog.py' + ' ' + filename;
     const { stdout, stderr } = await exec(command);

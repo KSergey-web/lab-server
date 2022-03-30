@@ -19,7 +19,7 @@ async function bootstrap() {
       transform: true,
     }),
   );
-  //app.enableCors();
+  app.enableCors();
   await app.listen(3000);
 }
 bootstrap();

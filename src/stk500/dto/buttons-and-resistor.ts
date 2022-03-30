@@ -2,7 +2,7 @@ import { IsNumber, isNumber, IsString, Length, Matches, Max, Min, min } from 'cl
 import { ApiProperty} from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 
-export class ButtonDTO {
+export class ButtonsAndResistorDTO {
   @Length(8)
   @ApiProperty()
   @Matches(/[0,1]{8}/)
@@ -13,3 +13,6 @@ export class ButtonDTO {
   @Matches(/[0,1]\d{4}/)
   resistor: string;
 }
+
+
+

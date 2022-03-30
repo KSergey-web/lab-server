@@ -17,7 +17,7 @@ export class Stk500Service {
     return await this.getLogs();
   }
 
-  async button(buttons: string, resistor: string) {
+  async runPhysicalImpactScript(buttons: string = '00000000', resistor: string = '00000') {
     const exec = util.promisify(ChildProcess.exec);
     const command = 'python C:\\inetpub\\wwwroot\\STK_but_adc.py' + ' ' + buttons +  ' ' + resistor;
     const { stdout, stderr } = await exec(command);
@@ -25,6 +25,14 @@ export class Stk500Service {
     console.log('stdout:', stdout);
     console.log('stderr:', stderr);
     return await this.getLogs();
+  }
+
+  valueResistorToCommand(value: number): string{
+    let command: string = '10000';
+    const strValue = value.toString();
+    const lenght = strValue.length;
+    command = command.slice(0, 5 - lenght) + strValue;
+    return command;
   }
 
   async flashFile(file: Express.Multer.File) {

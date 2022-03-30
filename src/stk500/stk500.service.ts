@@ -67,7 +67,7 @@ export class Stk500Service {
   async getLogs(){
     const readFile = util.promisify(fs.readFile);
     const logs: string = await readFile('C:\\inetpub\\wwwroot\\Log.txt', "utf8");
-    return logs;
+    return {stdout: logs};
   }
 }
 

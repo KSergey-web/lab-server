@@ -4,6 +4,6 @@ import { Stk500Controller } from './stk500.controller';
 
 @Module({
   controllers: [Stk500Controller],
-  providers: [Stk500Service]
+  providers: [Stk500Service],
 })
 export class Stk500Module {}

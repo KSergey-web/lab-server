@@ -10,9 +10,9 @@ export class Stk500Controller {
   constructor(private readonly stk500Service: Stk500Service) {}
 
 
-  @Get('clear')
+  @Get('clean')
   clear() {
-    return this.stk500Service.clear();
+    return this.stk500Service.clean();
   }
 
   @Post('upload')
@@ -39,5 +39,10 @@ export class Stk500Controller {
     @Param() params: ButtonDTO,
   ) {
     return this.stk500Service.button(params.buttons, params.resistor);
+  }
+
+  @Get('reset')
+  reset() {
+    return this.stk500Service.reflashFile();
   }
 }

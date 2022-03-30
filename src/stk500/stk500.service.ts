@@ -7,7 +7,7 @@ import * as path from 'path';
 @Injectable()
 export class Stk500Service {
 
-  async clear() {
+  async clean() {
     const exec = util.promisify(ChildProcess.exec);
     const command = 'python C:\\inetpub\\wwwroot\\STK_clean.py'
     const { stdout, stderr } = await exec(command);
@@ -28,9 +28,23 @@ export class Stk500Service {
   }
 
   async flashFile(file: Express.Multer.File) {
+    await this.clean();
     const exec = util.promisify(ChildProcess.exec);
     const filename: string = await this.saveFile(file);
     console.log(filename);
+    const command = 'python C:\\inetpub\\wwwroot\\STK_prog.py' + ' ' + filename;
+    const { stdout, stderr } = await exec(command);
+    console.log('com ',command);
+    console.log('stdout:', stdout);
+    console.log('stderr:', stderr);
+    return { stdout, stderr };
+  }
+
+  async reflashFile() {
+    const exec = util.promisify(ChildProcess.exec);
+    const { stdout: files } = await exec('dir *.m /B/o:-d');
+    const filename = files.split('\n')[0];
+    console.log("flash file: ", filename);
     const command = 'python C:\\inetpub\\wwwroot\\STK_prog.py' + ' ' + filename;
     const { stdout, stderr } = await exec(command);
     console.log('com ',command);
@@ -46,6 +60,12 @@ export class Stk500Service {
       file.buffer,
     );
     return file.originalname;
+  }
+
+  async getLogs(){
+    const readFile = util.promisify(fs.readFile);
+    const logs: string = await readFile('C:\\inetpub\\wwwroot\\Log.txt', "utf8");
+    return logs;
   }
 }
 

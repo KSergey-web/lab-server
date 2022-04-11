@@ -13,6 +13,7 @@ export class Stk500Service {
     console.log('com ', command);
     console.log('stdout:', stdout);
     console.log('stderr:', stderr);
+    if (stderr) return 'stderr:' + stderr;
     return await this.getLogs();
   }
 
@@ -31,6 +32,7 @@ export class Stk500Service {
     console.log('com ', command);
     console.log('stdout:', stdout);
     console.log('stderr:', stderr);
+    if (stderr) return 'stderr:' + stderr;
     return await this.getLogs();
   }
 
@@ -52,6 +54,7 @@ export class Stk500Service {
     console.log('com ', command);
     console.log('stdout:', stdout);
     console.log('stderr:', stderr);
+    if (stderr) return 'stderr:' + stderr;
     return await this.getLogs();
   }
 
@@ -68,6 +71,7 @@ export class Stk500Service {
     console.log('com ', command);
     console.log('stdout:', stdout);
     console.log('stderr:', stderr);
+    if (stderr) return 'stderr:' + stderr;
     return await this.getLogs();
   }
 

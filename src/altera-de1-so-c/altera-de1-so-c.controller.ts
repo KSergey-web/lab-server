@@ -79,7 +79,7 @@ export class AlteraDe1SoCController {
   }
 
   @Get('switches/:switches')
-  resistorAction(@Param() params: SwitchesDTO): Promise<Output> {
+  switchAction(@Param() params: SwitchesDTO): Promise<Output> {
     return this.alteraDe1SoCService.runPhysicalImpactScript(params.switches);
   }
 
@@ -89,5 +89,13 @@ export class AlteraDe1SoCController {
   })
   reset(): Promise<Output> {
     return this.alteraDe1SoCService.reflashFile();
+  }
+
+  @Get('turn-off-switches')
+  @ApiOkResponse({
+    type: OutputDTO,
+  })
+  turnOffSwitches(): Promise<Output> {
+    return this.alteraDe1SoCService.turnOffSwitches();
   }
 }

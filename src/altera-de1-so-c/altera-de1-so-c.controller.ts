@@ -54,7 +54,7 @@ export class AlteraDe1SoCController {
     return this.alteraDe1SoCService.flashFile(file);
   }
 
-  @Get('button/:buttons/resistor/:resistor')
+  @Get('switches/:switches/buttons/:buttons')
   @ApiOkResponse({
     type: OutputDTO,
   })

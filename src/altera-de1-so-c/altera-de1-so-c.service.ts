@@ -6,9 +6,36 @@ import * as path from 'path';
 import { Output } from 'src/share/response/output.interface';
 
 @Injectable()
-export class Stk500Service {
-  async clean() {
-    const command = 'python C:\\inetpub\\wwwroot\\STK_clean.py';
+export class AlteraDe1SoCService {
+  async clean(): Promise<Output> {
+    const command = 'python C:\\Scripts\\FPGA_clean.py';
+    return this.runScript(command);
+  }
+
+  async turnOffSwitches(): Promise<Output> {
+    const command = 'python C:\\Scripts\\FPGA_buttons.py cle 0 0';
+    return this.runScript(command);
+  }
+
+  async runPhysicalImpactScript(
+    switches: string = '00000000',
+    buttons: string = '0000',
+  ): Promise<Output> {
+    const command =
+      'python C:\\Scripts\\FPGA_buttons.py key' +
+      ' ' +
+      switches +
+      ' ' +
+      buttons;
+    return this.runScript(command);
+  }
+
+  async flashFile(file: Express.Multer.File): Promise<Output> {
+    await this.clean();
+    const filename: string = await this.saveFile(file);
+    console.log(filename);
+    const command =
+      'python C:\\Scripts\\FPGA_prog.py' + ' ' + `C:\\Scripts\\${filename}`;
     return this.runScript(command);
   }
 
@@ -22,52 +49,23 @@ export class Stk500Service {
     return await this.getLogs();
   }
 
-  async runPhysicalImpactScript(
-    buttons: string = '00000000',
-    resistor: string = '00000',
-  ): Promise<Output> {
-    const exec = util.promisify(ChildProcess.exec);
-    const command =
-      'python C:\\inetpub\\wwwroot\\STK_but_adc.py' +
-      ' ' +
-      buttons +
-      ' ' +
-      resistor;
-    return this.runScript(command);
-  }
-
-  valueResistorToCommand(value: number): string {
-    let command: string = '10000';
-    const strValue = value.toString();
-    const lenght = strValue.length;
-    command = command.slice(0, 5 - lenght) + strValue;
-    return command;
-  }
-
-  async flashFile(file: Express.Multer.File): Promise<Output> {
-    await this.clean();
-    const filename: string = await this.saveFile(file);
-    console.log(filename);
-    const command = 'python C:\\inetpub\\wwwroot\\STK_prog.py' + ' ' + filename;
-    return this.runScript(command);
-  }
-
   async reflashFile(): Promise<Output> {
     const exec = util.promisify(ChildProcess.exec);
     const { stdout: files } = await exec('dir *.hex /B/o:-d');
     const arrayfiles = files.split('\n');
     if (arrayfiles.length < 1)
-      throw new BadRequestException('Hex file in directory is not found');
+      throw new BadRequestException('Sof file in directory is not found');
     const filename = arrayfiles[0];
     console.log('flash file: ', filename);
-    const command = 'python C:\\inetpub\\wwwroot\\STK_prog.py' + ' ' + filename;
+    const command =
+      'python C:\\Scripts\\FPGA_prog.py' + ' ' + `C:\\Scripts\\${filename}`;
     return this.runScript(command);
   }
 
   async saveFile(file: Express.Multer.File): Promise<string> {
     const write = await fs.promises.writeFile(
       //    `C:\\inetpub\\wwwroot\\${file.originalname}`,
-      `./${file.originalname}`,
+      `C:\\Scripts\\${file.originalname}`,
       file.buffer,
     );
     return file.originalname;
@@ -75,10 +73,7 @@ export class Stk500Service {
 
   async getLogs(): Promise<{ stdout: string }> {
     const readFile = util.promisify(fs.readFile);
-    const logs: string = await readFile(
-      'C:\\inetpub\\wwwroot\\Log.txt',
-      'utf8',
-    );
+    const logs: string = await readFile('C:\\Scripts\\Log.txt', 'utf8');
     return { stdout: logs };
   }
 }

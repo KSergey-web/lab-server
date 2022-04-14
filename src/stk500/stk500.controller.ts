@@ -24,6 +24,14 @@ import { OutputDTO } from 'src/share/dto/output.dto';
 export class Stk500Controller {
   constructor(private readonly stk500Service: Stk500Service) {}
 
+  @Get('resistor')
+  @ApiOkResponse({
+    type: ResistorDTO
+  })
+  getResisor(): {resistor: number} {
+    return {resistor: this.stk500Service.resistor};
+  }
+
   @Get('clean')
   @ApiOkResponse({
     type: OutputDTO,

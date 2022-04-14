@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import * as util from 'util';
 import * as ChildProcess from 'child_process';
 import * as fs from 'fs';
@@ -7,9 +7,21 @@ import { Output } from 'src/share/response/output.interface';
 
 @Injectable()
 export class Stk500Service {
-  async clean() {
+  private _resistor: number = 32;
+
+  private setResistorMin(): void{
+    this._resistor = 32;
+  }
+
+  get resistor(): number{
+    return this._resistor;
+  }
+
+  async clean(): Promise<Output> {
     const command = 'python C:\\inetpub\\wwwroot\\STK_clean.py';
-    return this.runScript(command);
+    const res = await this.runScript(command);
+    this.setResistorMin();
+    return res;
   }
 
   async runScript(command: string): Promise<Output> {
@@ -18,7 +30,7 @@ export class Stk500Service {
     console.log('com ', command);
     console.log('stdout:', stdout);
     console.log('stderr:', stderr);
-    if (stderr) return { stderr: stderr };
+    if (stderr) new HttpException(`Some error during execution or start up a script \n stderr: ${stderr}`, HttpStatus.SERVICE_UNAVAILABLE);
     return await this.getLogs();
   }
 
@@ -33,7 +45,9 @@ export class Stk500Service {
       buttons +
       ' ' +
       resistor;
-    return this.runScript(command);
+      const res = await this.runScript(command);
+      this._resistor = parseInt(resistor.slice(1));
+      return res;;
   }
 
   valueResistorToCommand(value: number): string {
@@ -49,7 +63,9 @@ export class Stk500Service {
     const filename: string = await this.saveFile(file);
     console.log(filename);
     const command = 'python C:\\inetpub\\wwwroot\\STK_prog.py' + ' ' + filename;
-    return this.runScript(command);
+    const res = await this.runScript(command);
+    this.setResistorMin();
+    return res;
   }
 
   async reflashFile(): Promise<Output> {
@@ -61,7 +77,9 @@ export class Stk500Service {
     const filename = arrayfiles[0];
     console.log('flash file: ', filename);
     const command = 'python C:\\inetpub\\wwwroot\\STK_prog.py' + ' ' + filename;
-    return this.runScript(command);
+    const res = await this.runScript(command);
+    this.setResistorMin();
+    return res;
   }
 
   async saveFile(file: Express.Multer.File): Promise<string> {

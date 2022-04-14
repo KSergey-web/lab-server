@@ -1,4 +1,3 @@
 export interface Output {
-  stdout?: string;
-  stderr?: string;
+  stdout: string;
 }

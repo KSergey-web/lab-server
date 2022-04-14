@@ -1,9 +1,7 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Output } from '../response/output.interface';
 
-export class OutputDTO {
-  @ApiPropertyOptional()
-  stdout?: string;
-
-  @ApiPropertyOptional()
-  stderr?: string;
+export class OutputDTO implements Output{
+  @ApiProperty()
+  stdout: string;
 }

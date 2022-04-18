@@ -71,7 +71,6 @@ export class AlteraDe1SoCService {
     async reflashFile(): Promise<Output> {
         const filename = await this.equipmentFileService.findSourceFileInWindows('sof');
         console.log('flash file: ', filename);
-        await this.clean();
         const command =
             'python C:\\Scripts\\FPGA_prog.py' + ' ' + `${filename}`;
         const res = await this.equipmentFileService.runScript(command);

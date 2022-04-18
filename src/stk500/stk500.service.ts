@@ -68,7 +68,6 @@ export class Stk500Service {
   async reflashFile(): Promise<Output> {
     const filename = await this.equipmentFileService.findSourceFileInWindows('hex');
     console.log('flash file: ', filename);
-    await this.clean();
     const command = 'python C:\\Scripts\\STK_prog.py' + ' ' + filename;
     const res = await this.equipmentFileService.runScript(command);
     this.setResistorMin();

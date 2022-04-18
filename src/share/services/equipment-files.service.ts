@@ -21,9 +21,12 @@ export class EquipmentFilesService {
     async runScript(command: string): Promise<Output> {
         const exec = util.promisify(ChildProcess.exec);
         const { stdout, stderr } = await exec(command);
-        console.log('com ', command);
+        console.log('--------------');
+        console.log('command: ', command);
         console.log('stdout:', stdout);
         console.log('stderr:', stderr);
+        console.log('stderr:', stderr);
+        console.log('--------------');
         if (stderr) new HttpException(`Some error during execution or start up a script \n stderr: ${stderr}`, HttpStatus.SERVICE_UNAVAILABLE);
         return await this.getLogs();
     }

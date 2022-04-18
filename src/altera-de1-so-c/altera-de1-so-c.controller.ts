@@ -35,7 +35,7 @@ export class AlteraDe1SoCController {
   @ApiOkResponse({
     type: SwitchesDTO
   })
-  getSwitchesStatus(): {switches: string} {
+  getStatusSwitches(): {switches: string} {
     return {switches: this.alteraDe1SoCService.switches};
   }
 

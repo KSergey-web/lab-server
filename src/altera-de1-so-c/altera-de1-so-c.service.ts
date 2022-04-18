@@ -4,9 +4,14 @@ import * as ChildProcess from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 import { Output } from 'src/share/response/output.interface';
+import { EquipmentFilesService } from 'src/share/services/equipment-files.service';
 
 @Injectable()
 export class AlteraDe1SoCService {
+
+    constructor(private equipmentFileService: EquipmentFilesService){
+
+    }
     private _switches: number[] = [0, 0, 0, 0, 0, 0, 0, 0];
 
     private setSwitchesToDefault(): void{
@@ -25,14 +30,14 @@ export class AlteraDe1SoCService {
 
     async clean(): Promise<Output> {
         const command = 'python C:\\Scripts\\FPGA_clean.py';
-        const res = await this.runScript(command);
+        const res = await this.equipmentFileService.runScript(command);
         this.setSwitchesToDefault();
         return res;
     }
 
     async turnOffSwitches(): Promise<Output> {
         const command = 'python C:\\Scripts\\FPGA_buttons.py cle 0 0';
-        const res = await this.runScript(command);
+        const res = await this.equipmentFileService.runScript(command);
         this.setSwitchesToDefault();
         return res;
     }
@@ -47,59 +52,31 @@ export class AlteraDe1SoCService {
             switches +
             ' ' +
             buttons;
-        const res = await this.runScript(command);
+        const res = await this.equipmentFileService.runScript(command);
         this.switches = switches;
         return res;
     }
 
     async flashFile(file: Express.Multer.File): Promise<Output> {
         await this.clean();
-        const filename: string = await this.saveFile(file);
+        const filename: string = await this.equipmentFileService.saveFile(file);
         console.log(filename);
         const command =
-            'python C:\\Scripts\\FPGA_prog.py' + ' ' + `C:\\Scripts\\${filename}`;
-        const res = await this.runScript(command);
+            'python C:\\Scripts\\FPGA_prog.py' + ' ' + `${filename}`;
+        const res = await this.equipmentFileService.runScript(command);
         this.setSwitchesToDefault();
         return res;
-    }
-
-    async runScript(command: string): Promise<Output> {
-        const exec = util.promisify(ChildProcess.exec);
-        const { stdout, stderr } = await exec(command);
-        console.log('com ', command);
-        console.log('stdout:', stdout);
-        console.log('stderr:', stderr);
-        if (stderr) new HttpException(`Some error during execution or start up a script \n stderr: ${stderr}`, HttpStatus.SERVICE_UNAVAILABLE);
-        return await this.getLogs();
     }
 
     async reflashFile(): Promise<Output> {
-        const exec = util.promisify(ChildProcess.exec);
-        const { stdout: files } = await exec('dir C:\\Scripts\\*.sof /B/o:-d');
-        const arrayfiles = files.split('\n');
-        if (arrayfiles.length < 1)
-            throw new BadRequestException('Sof file in directory is not found');
-        const filename = arrayfiles[0];
+        const filename = await this.equipmentFileService.findSourceFileInWindows('sof');
         console.log('flash file: ', filename);
+        await this.clean();
         const command =
-            'python C:\\Scripts\\FPGA_prog.py' + ' ' + `C:\\Scripts\\${filename}`;
-        const res = await this.runScript(command);
+            'python C:\\Scripts\\FPGA_prog.py' + ' ' + `${filename}`;
+        const res = await this.equipmentFileService.runScript(command);
         this.setSwitchesToDefault();
         return res;
     }
 
-    async saveFile(file: Express.Multer.File): Promise<string> {
-        const write = await fs.promises.writeFile(
-            //    `C:\\inetpub\\wwwroot\\${file.originalname}`,
-            `C:\\Scripts\\${file.originalname}`,
-            file.buffer,
-        );
-        return file.originalname;
-    }
-
-    async getLogs(): Promise<Output> {
-        const readFile = util.promisify(fs.readFile);
-        const logs: string = await readFile('C:\\Scripts\\Log.txt', 'utf8');
-        return { stdout: logs };
-    }
 }

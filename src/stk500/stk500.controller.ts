@@ -26,10 +26,10 @@ export class Stk500Controller {
 
   @Get('resistor')
   @ApiOkResponse({
-    type: ResistorDTO
+    type: ResistorDTO,
   })
-  getResisor(): {resistor: number} {
-    return {resistor: this.stk500Service.resistor};
+  getResisor(): { resistor: number } {
+    return { resistor: this.stk500Service.resistor };
   }
 
   @Get('clean')

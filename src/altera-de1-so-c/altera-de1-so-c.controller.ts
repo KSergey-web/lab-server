@@ -19,8 +19,6 @@ import { SwitchesDTO } from './dto/switches.dto';
 @ApiTags('Altera-de1-so-c')
 @Controller('altera-de1-so-c')
 export class AlteraDe1SoCController {
-  
-
   constructor(private readonly alteraDe1SoCService: AlteraDe1SoCService) {}
 
   @Get('clean')
@@ -33,10 +31,10 @@ export class AlteraDe1SoCController {
 
   @Get('status-switches')
   @ApiOkResponse({
-    type: SwitchesDTO
+    type: SwitchesDTO,
   })
-  getStatusSwitches(): {switches: string} {
-    return {switches: this.alteraDe1SoCService.switches};
+  getStatusSwitches(): { switches: string } {
+    return { switches: this.alteraDe1SoCService.switches };
   }
 
   @Post('upload')

@@ -10,6 +10,6 @@ import { EquipmentFilesService } from './share/services/equipment-files.service'
   controllers: [AppController],
   providers: [AppService, EquipmentFilesService],
   imports: [Stk500Module, AlteraDe1SoCModule],
-  exports:[EquipmentFilesService]
+  exports: [EquipmentFilesService],
 })
 export class AppModule {}

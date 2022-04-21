@@ -1,4 +1,9 @@
-import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
 import * as util from 'util';
 import * as ChildProcess from 'child_process';
 import * as fs from 'fs';
@@ -8,18 +13,15 @@ import { EquipmentFilesService } from 'src/share/services/equipment-files.servic
 
 @Injectable()
 export class Stk500Service {
+  constructor(private readonly equipmentFileService: EquipmentFilesService) {}
 
-  constructor(private equipmentFileService: EquipmentFilesService){
-
-  }
-  
   private _resistor: number = 32;
 
-  private setResistorMin(): void{
+  private setResistorMin(): void {
     this._resistor = 32;
   }
 
-  get resistor(): number{
+  get resistor(): number {
     return this._resistor;
   }
 
@@ -30,21 +32,16 @@ export class Stk500Service {
     return res;
   }
 
-
   async runPhysicalImpactScript(
     buttons: string = '00000000',
     resistor: string = '00000',
   ): Promise<Output> {
     const exec = util.promisify(ChildProcess.exec);
     const command =
-      'python C:\\Scripts\\STK_but_adc.py' +
-      ' ' +
-      buttons +
-      ' ' +
-      resistor;
-      const res = await this.equipmentFileService.runScript(command);
-      this._resistor = parseInt(resistor.slice(1));
-      return res;;
+      'python C:\\Scripts\\STK_but_adc.py' + ' ' + buttons + ' ' + resistor;
+    const res = await this.equipmentFileService.runScript(command);
+    this._resistor = parseInt(resistor.slice(1));
+    return res;
   }
 
   valueResistorToCommand(value: number): string {
@@ -66,7 +63,9 @@ export class Stk500Service {
   }
 
   async reflashFile(): Promise<Output> {
-    const filename = await this.equipmentFileService.findSourceFileInWindows('hex');
+    const filename = await this.equipmentFileService.findSourceFileInWindows(
+      'hex',
+    );
     console.log('flash file: ', filename);
     const command = 'python C:\\Scripts\\STK_prog.py' + ' ' + filename;
     const res = await this.equipmentFileService.runScript(command);

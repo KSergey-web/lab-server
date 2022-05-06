@@ -36,7 +36,6 @@ export class EquipmentFilesService {
     console.log('command: ', command);
     console.log('stdout:', stdout);
     console.log('stderr:', stderr);
-    console.log('stderr:', stderr);
     console.log('--------------');
     if (stderr)
       new HttpException(

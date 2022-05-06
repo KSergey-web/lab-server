@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  ParseIntPipe,
   Post,
   UploadedFile,
   UseInterceptors,
@@ -11,13 +12,17 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBody, ApiConsumes, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { OutputDTO } from 'src/share/dto/output.dto';
 import { Output } from 'src/share/response/output.interface';
+import { AlteraDe1SoCInterceptor } from './altera-de1-so-c.interceptor';
 import { AlteraDe1SoCService } from './altera-de1-so-c.service';
+import { ButtonDTO } from './dto/button.dto';
 import { ButtonsDTO } from './dto/buttons.dto';
+import { SwitchDTO } from './dto/switch.dto';
 import { SwitchesAndButtnsDTO } from './dto/switches-And-Buttons.dto';
 import { SwitchesDTO } from './dto/switches.dto';
 
 @ApiTags('Altera-de1-so-c')
 @Controller('altera-de1-so-c')
+@UseInterceptors(AlteraDe1SoCInterceptor)
 export class AlteraDe1SoCController {
   constructor(private readonly alteraDe1SoCService: AlteraDe1SoCService) {}
 
@@ -75,11 +80,32 @@ export class AlteraDe1SoCController {
     );
   }
 
+  @Get('button/:buttonInd')
+  @ApiOkResponse({
+    type: OutputDTO,
+  })
+  buttonAction(@Param() dto: ButtonDTO): Promise<Output> {
+    return this.alteraDe1SoCService.changeButtonStatusByInd(
+      dto.buttonInd
+    );
+  }
+
+  @Get('switch/:switchInd')
+  @ApiOkResponse({
+    type: OutputDTO,
+  })
+  switchAction(@Param() dto: SwitchDTO
+  ): Promise<Output> {
+    return this.alteraDe1SoCService.changeSwitchStatusByInd(
+      dto.switchInd
+    );
+  }
+
   @Get('buttons/:buttons')
   @ApiOkResponse({
     type: OutputDTO,
   })
-  buttonAction(@Param() params: ButtonsDTO): Promise<Output> {
+  buttonsAction(@Param() params: ButtonsDTO): Promise<Output> {
     return this.alteraDe1SoCService.runPhysicalImpactScript(
       undefined,
       params.buttons,
@@ -87,7 +113,7 @@ export class AlteraDe1SoCController {
   }
 
   @Get('switches/:switches')
-  switchAction(@Param() params: SwitchesDTO): Promise<Output> {
+  switchesAction(@Param() params: SwitchesDTO): Promise<Output> {
     return this.alteraDe1SoCService.runPhysicalImpactScript(params.switches);
   }
 

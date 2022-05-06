@@ -14,11 +14,10 @@ export class Stk500Interceptor implements NestInterceptor {
     return next
       .handle()
       .pipe(
-        map((output) =>
-          output.resistor
-            ? output
-            : (output.resistor = this.stk500Service.resistor),
-        ),
+        map((output) => {
+          output.resistor = this.stk500Service.resistor;
+          return output;
+        }),
       );
   }
 }

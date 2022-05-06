@@ -14,10 +14,10 @@ export class AlteraDe1SoCInterceptor implements NestInterceptor {
     return next
       .handle()
       .pipe(
-        map((output) =>
-          output.switches
-            ? output
-            : (output.switches = this.alteraDe1SoCService.switches),
+        map((output) => {
+          output.switches = this.alteraDe1SoCService.switches;
+          return output;
+        }
         ),
       );
   }

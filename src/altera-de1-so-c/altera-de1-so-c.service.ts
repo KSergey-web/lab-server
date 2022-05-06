@@ -10,6 +10,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { Output } from 'src/share/response/output.interface';
 import { EquipmentFilesService } from 'src/share/services/equipment-files.service';
+import { CommandHelper } from 'src/share/command-helper.class';
 
 @Injectable()
 export class AlteraDe1SoCService {
@@ -43,6 +44,18 @@ export class AlteraDe1SoCService {
     this.setSwitchesToDefault();
     return res;
   }
+
+  async changeButtonStatusByInd(ind: number){
+    const buttons: string = CommandHelper.indexToCommand(ind, 4);
+    return this.runPhysicalImpactScript(undefined, buttons)
+  }
+
+  async changeSwitchStatusByInd(ind: number){
+    const switches: string = CommandHelper.indexToCommand(ind, 8);
+    return this.runPhysicalImpactScript(switches)
+  }
+
+  
 
   async runPhysicalImpactScript(
     switches: string = '00000000',

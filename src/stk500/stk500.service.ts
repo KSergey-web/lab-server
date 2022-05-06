@@ -10,6 +10,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { Output } from 'src/share/response/output.interface';
 import { EquipmentFilesService } from 'src/share/services/equipment-files.service';
+import { CommandHelper } from 'src/share/command-helper.class';
 
 @Injectable()
 export class Stk500Service {
@@ -23,6 +24,11 @@ export class Stk500Service {
 
   get resistor(): number {
     return this._resistor;
+  }
+
+  async changeButtonStatusByInd(ind: number){
+    const buttons: string = CommandHelper.indexToCommand(ind, 8);
+    return this.runPhysicalImpactScript(buttons)
   }
 
   async clean(): Promise<Output> {

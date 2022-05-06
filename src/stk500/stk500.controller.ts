@@ -18,9 +18,12 @@ import { ButtonsDTO } from './dto/buttons';
 import { ResistorDTO } from './dto/resistor';
 import { Output } from 'src/share/response/output.interface';
 import { OutputDTO } from 'src/share/dto/output.dto';
+import { Stk500Interceptor } from './stk500.interceptor';
+import { ButtonDTO } from './dto/button.dto';
 
 @ApiTags('stk500')
 @Controller('stk500')
+@UseInterceptors(Stk500Interceptor)
 export class Stk500Controller {
   constructor(private readonly stk500Service: Stk500Service) {}
 
@@ -30,6 +33,17 @@ export class Stk500Controller {
   })
   getResisor(): { resistor: number } {
     return { resistor: this.stk500Service.resistor };
+  }
+
+
+  @Get('button/:buttonInd')
+  @ApiOkResponse({
+    type: OutputDTO,
+  })
+  buttonAction(@Param() dto: ButtonDTO): Promise<Output> {
+    return this.stk500Service.changeButtonStatusByInd(
+      dto.buttonInd
+    );
   }
 
   @Get('clean')
@@ -75,11 +89,11 @@ export class Stk500Controller {
     );
   }
 
-  @Get('button/:buttons')
+  @Get('buttons/:buttons')
   @ApiOkResponse({
     type: OutputDTO,
   })
-  buttonAction(@Param() params: ButtonsDTO): Promise<Output> {
+  buttonsAction(@Param() params: ButtonsDTO): Promise<Output> {
     return this.stk500Service.runPhysicalImpactScript(params.buttons);
   }
 

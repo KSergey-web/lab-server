@@ -61,4 +61,12 @@ export class Stm32Controller {
     return this.stm32Service.reflashFile();
   }
 
+
+  @Get('clean')
+  @ApiOkResponse({
+    type: OutputDTO,
+  })
+  clear(): Promise<Output> {
+    return this.stm32Service.clean();
+  }
 }

@@ -42,7 +42,6 @@ export class Stk500Service {
     buttons: string = '00000000',
     resistor: string = '00000',
   ): Promise<Output> {
-    const exec = util.promisify(ChildProcess.exec);
     const command =
       'python C:\\Scripts\\STK_but_adc.py' + ' ' + buttons + ' ' + resistor;
     const res = await this.equipmentFileService.runScript(command);

@@ -2,6 +2,10 @@
 /dist
 /node_modules
 
+#files
+*.sof
+*.hex
+
 # Logs
 logs
 *.log

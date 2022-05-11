@@ -32,7 +32,7 @@ export class Stm32Service {
       await this.clean();
       const filename: string = await this.equipmentFileService.saveFile(file);
       console.log(filename);
-      const command = 'python C:\\Scripts\\Prog.py' + ' ' + filename;
+      const command = 'python C:\\Scripts\\Prog.py' + ' ' + `C:\\Scripts\\${filename}`;
       const res = await this.equipmentFileService.runScript(command);
       return res;
     }
@@ -42,7 +42,7 @@ export class Stm32Service {
         'bin',
       );
       console.log('flash file: ', filename);
-      const command = 'python C:\\Scripts\\Prog.py' + ' ' + filename;
+      const command = 'python C:\\Scripts\\Prog.py' + ' ' + `C:\\Scripts\\${filename}`;
       const res = await this.equipmentFileService.runScript(command);
       return res;
     }

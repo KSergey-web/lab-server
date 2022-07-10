@@ -1,3 +1,26 @@
+<h1>Laboratory stand server</h1>
+
+the server is running on the computer to which the microcontroller should be connected. It accepts requests from the intermediary server and performs actions with the connected microcontroller.
+Supported Microcontrollers:
+
+- STK500;
+- STM32;
+- Altera De 1 Soc;
+
+General scheme of the web application
+![alt text](https://github.com/KSergey-web/hardware-sfu-online/blob/master/scheme.png)
+
+<h2>Relative links</h2>
+
+- laboratory stand server (https://github.com/KSergey-web/lab-server);
+- intermediary server (https://github.com/KSergey-web/server-intermediary-sfu);
+- main server based on CMS Straps (https://github.com/KSergey-web/hardware-sfu-online);
+- Angular SPA app (https://github.com/KSergey-web/hardware-client);
+
+Third-party software:
+
+- video stream server (https://github.com/aler9/rtsp-simple-server);
+
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo_text.svg" width="320" alt="Nest Logo" /></a>
 </p>

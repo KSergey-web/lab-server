@@ -4,6 +4,6 @@ import { Stm32Controller } from './stm32.controller';
 
 @Module({
   controllers: [Stm32Controller],
-  providers: [Stm32Service]
+  providers: [Stm32Service],
 })
 export class Stm32Module {}

@@ -3,7 +3,6 @@ import {
   Controller,
   Get,
   Param,
-  ParseIntPipe,
   Post,
   UploadedFile,
   UseInterceptors,
@@ -85,20 +84,15 @@ export class AlteraDe1SoCController {
     type: OutputDTO,
   })
   buttonAction(@Param() dto: ButtonDTO): Promise<Output> {
-    return this.alteraDe1SoCService.changeButtonStatusByInd(
-      dto.buttonInd
-    );
+    return this.alteraDe1SoCService.changeButtonStatusByInd(dto.buttonInd);
   }
 
   @Get('switch/:switchInd')
   @ApiOkResponse({
     type: OutputDTO,
   })
-  switchAction(@Param() dto: SwitchDTO
-  ): Promise<Output> {
-    return this.alteraDe1SoCService.changeSwitchStatusByInd(
-      dto.switchInd
-    );
+  switchAction(@Param() dto: SwitchDTO): Promise<Output> {
+    return this.alteraDe1SoCService.changeSwitchStatusByInd(dto.switchInd);
   }
 
   @Get('buttons/:buttons')

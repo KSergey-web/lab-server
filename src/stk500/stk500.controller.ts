@@ -1,25 +1,22 @@
 import {
+  BadRequestException,
   Controller,
   Get,
-  Post,
-  Body,
-  Patch,
   Param,
-  Delete,
+  Post,
   UploadedFile,
   UseInterceptors,
-  BadRequestException,
 } from '@nestjs/common';
-import { Stk500Service } from './stk500.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBody, ApiConsumes, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { ButtonsAndResistorDTO } from './dto/buttons-and-resistor';
-import { ButtonsDTO } from './dto/buttons';
-import { ResistorDTO } from './dto/resistor';
-import { Output } from 'src/share/response/output.interface';
 import { OutputDTO } from 'src/share/dto/output.dto';
-import { Stk500Interceptor } from './stk500.interceptor';
+import { Output } from 'src/share/response/output.interface';
 import { ButtonDTO } from './dto/button.dto';
+import { ButtonsDTO } from './dto/buttons';
+import { ButtonsAndResistorDTO } from './dto/buttons-and-resistor';
+import { ResistorDTO } from './dto/resistor';
+import { Stk500Interceptor } from './stk500.interceptor';
+import { Stk500Service } from './stk500.service';
 
 @ApiTags('stk500')
 @Controller('stk500')
@@ -31,19 +28,16 @@ export class Stk500Controller {
   @ApiOkResponse({
     type: ResistorDTO,
   })
-  getResisor(): { resistor: number } {
+  getResistor(): { resistor: number } {
     return { resistor: this.stk500Service.resistor };
   }
-
 
   @Get('button/:buttonInd')
   @ApiOkResponse({
     type: OutputDTO,
   })
   buttonAction(@Param() dto: ButtonDTO): Promise<Output> {
-    return this.stk500Service.changeButtonStatusByInd(
-      dto.buttonInd
-    );
+    return this.stk500Service.changeButtonStatusByInd(dto.buttonInd);
   }
 
   @Get('clean')

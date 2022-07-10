@@ -1,16 +1,7 @@
-import {
-  BadRequestException,
-  HttpException,
-  HttpStatus,
-  Injectable,
-} from '@nestjs/common';
-import * as util from 'util';
-import * as ChildProcess from 'child_process';
-import * as fs from 'fs';
-import * as path from 'path';
+import { Injectable } from '@nestjs/common';
+import { CommandHelper } from 'src/share/command-helper.class';
 import { Output } from 'src/share/response/output.interface';
 import { EquipmentFilesService } from 'src/share/services/equipment-files.service';
-import { CommandHelper } from 'src/share/command-helper.class';
 
 @Injectable()
 export class Stk500Service {
@@ -26,9 +17,9 @@ export class Stk500Service {
     return this._resistor;
   }
 
-  async changeButtonStatusByInd(ind: number){
+  async changeButtonStatusByInd(ind: number) {
     const buttons: string = CommandHelper.indexToCommand(ind, 8);
-    return this.runPhysicalImpactScript(buttons)
+    return this.runPhysicalImpactScript(buttons);
   }
 
   async clean(): Promise<Output> {

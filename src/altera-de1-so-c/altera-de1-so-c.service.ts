@@ -1,16 +1,7 @@
-import {
-  BadRequestException,
-  HttpException,
-  HttpStatus,
-  Injectable,
-} from '@nestjs/common';
-import * as util from 'util';
-import * as ChildProcess from 'child_process';
-import * as fs from 'fs';
-import * as path from 'path';
+import { Injectable } from '@nestjs/common';
+import { CommandHelper } from 'src/share/command-helper.class';
 import { Output } from 'src/share/response/output.interface';
 import { EquipmentFilesService } from 'src/share/services/equipment-files.service';
-import { CommandHelper } from 'src/share/command-helper.class';
 
 @Injectable()
 export class AlteraDe1SoCService {
@@ -45,17 +36,15 @@ export class AlteraDe1SoCService {
     return res;
   }
 
-  async changeButtonStatusByInd(ind: number){
+  async changeButtonStatusByInd(ind: number) {
     const buttons: string = CommandHelper.indexToCommand(ind, 4);
-    return this.runPhysicalImpactScript(undefined, buttons)
+    return this.runPhysicalImpactScript(undefined, buttons);
   }
 
-  async changeSwitchStatusByInd(ind: number){
+  async changeSwitchStatusByInd(ind: number) {
     const switches: string = CommandHelper.indexToCommand(ind, 8);
-    return this.runPhysicalImpactScript(switches)
+    return this.runPhysicalImpactScript(switches);
   }
-
-  
 
   async runPhysicalImpactScript(
     switches: string = '00000000',

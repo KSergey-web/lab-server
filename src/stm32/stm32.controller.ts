@@ -1,4 +1,12 @@
-import { BadRequestException, Controller, Get, Param, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  Param,
+  Post,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBody, ApiConsumes, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { OutputDTO } from 'src/share/dto/output.dto';
@@ -20,15 +28,12 @@ export class Stm32Controller {
     return this.stm32Service.runPhysicalImpactScript(params.buttons);
   }
 
-
   @Get('button/:buttonInd')
   @ApiOkResponse({
     type: OutputDTO,
   })
   buttonAction(@Param() dto: ButtonDTO): Promise<Output> {
-    return this.stm32Service.changeButtonStatusByInd(
-      dto.buttonInd
-    );
+    return this.stm32Service.changeButtonStatusByInd(dto.buttonInd);
   }
 
   @Post('upload')
@@ -60,7 +65,6 @@ export class Stm32Controller {
   reset(): Promise<Output> {
     return this.stm32Service.reflashFile();
   }
-
 
   @Get('clean')
   @ApiOkResponse({

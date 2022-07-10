@@ -11,13 +11,11 @@ import { Stk500Service } from './stk500.service';
 export class Stk500Interceptor implements NestInterceptor {
   constructor(private readonly stk500Service: Stk500Service) {}
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-    return next
-      .handle()
-      .pipe(
-        map((output) => {
-          output.resistor = this.stk500Service.resistor;
-          return output;
-        }),
-      );
+    return next.handle().pipe(
+      map((output) => {
+        output.resistor = this.stk500Service.resistor;
+        return output;
+      }),
+    );
   }
 }

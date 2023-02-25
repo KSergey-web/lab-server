@@ -11,7 +11,6 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBody, ApiConsumes, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { IEquipmentDTO } from 'src/share/dto/equipment.dto';
-
 import { OutputDTO } from 'src/share/dto/output.dto';
 import { Output } from 'src/share/response/output.interface';
 import { ButtonDTO } from './dto/button.dto';
@@ -39,14 +38,17 @@ export class Stk500Controller {
   @ApiOkResponse({
     type: OutputDTO,
   })
-  buttonAction(
+  async buttonAction(
     @Param() dto: ButtonDTO,
     @Query() deviceInfo: IEquipmentDTO,
   ): Promise<Output> {
-    return this.stk500Service.changeButtonStatusByInd(
-      dto.buttonInd,
-      deviceInfo,
-    );
+    await this.stk500Service.changeButtonStatusByInd(dto.buttonInd, deviceInfo);
+    return {
+      stdout:
+        new Date().toLocaleTimeString() +
+        ' ' +
+        `Состояние кнопки SW${dto.buttonInd} изменено`,
+    };
   }
 
   @Get('clean')
@@ -86,11 +88,17 @@ export class Stk500Controller {
   @ApiOkResponse({
     type: OutputDTO,
   })
-  resistorAction(
+  async resistorAction(
     @Param() params: ResistorDTO,
     @Query() deviceInfo: IEquipmentDTO,
   ): Promise<Output> {
-    return this.stk500Service.changeResistorStatus(params.resistor, deviceInfo);
+    await this.stk500Service.changeResistorStatus(params.resistor, deviceInfo);
+    return {
+      stdout:
+        new Date().toLocaleTimeString() +
+        ' ' +
+        `На АЦП подано значени: ${params.resistor}`,
+    };
   }
 
   @Get('reset')

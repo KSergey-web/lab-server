@@ -10,8 +10,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBody, ApiConsumes, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { DeviceInfoDTO } from 'src/share/dto/device-info.dto';
-import { DevicePortDTO } from 'src/share/dto/device-port.dto';
+import { IEquipmentDTO } from 'src/share/dto/equipment.dto';
 
 import { OutputDTO } from 'src/share/dto/output.dto';
 import { Output } from 'src/share/response/output.interface';
@@ -30,9 +29,9 @@ export class Stk500Controller {
   @ApiOkResponse({
     type: ResistorDTO,
   })
-  getResistor(@Query() query: DevicePortDTO): { resistor: number } {
+  getResistor(@Query() query: IEquipmentDTO): { resistor: number } {
     return {
-      resistor: this.stk500Service.getResistorValueByPort(query.devicePort),
+      resistor: this.stk500Service.getResistorValue(query.id),
     };
   }
 
@@ -42,7 +41,7 @@ export class Stk500Controller {
   })
   buttonAction(
     @Param() dto: ButtonDTO,
-    @Query() deviceInfo: DeviceInfoDTO,
+    @Query() deviceInfo: IEquipmentDTO,
   ): Promise<Output> {
     return this.stk500Service.changeButtonStatusByInd(
       dto.buttonInd,
@@ -54,8 +53,8 @@ export class Stk500Controller {
   @ApiOkResponse({
     type: OutputDTO,
   })
-  clear(@Query() query: DeviceInfoDTO): Promise<Output> {
-    return this.stk500Service.clean(query.devicePort);
+  clear(@Query() query: IEquipmentDTO): Promise<Output> {
+    return this.stk500Service.clean(query);
   }
 
   @Post('upload')
@@ -77,10 +76,10 @@ export class Stk500Controller {
   @UseInterceptors(FileInterceptor('file'))
   uploadFile(
     @UploadedFile() file: Express.Multer.File,
-    @Query() query: DeviceInfoDTO,
+    @Query() query: IEquipmentDTO,
   ): Promise<Output> {
     if (!file) throw new BadRequestException('file is not getted');
-    return this.stk500Service.flashFile(file, query.devicePort);
+    return this.stk500Service.flashFile(file, query);
   }
 
   @Get('resistor/:resistor')
@@ -89,7 +88,7 @@ export class Stk500Controller {
   })
   resistorAction(
     @Param() params: ResistorDTO,
-    @Query() deviceInfo: DeviceInfoDTO,
+    @Query() deviceInfo: IEquipmentDTO,
   ): Promise<Output> {
     return this.stk500Service.changeResistorStatus(params.resistor, deviceInfo);
   }
@@ -98,7 +97,7 @@ export class Stk500Controller {
   @ApiOkResponse({
     type: OutputDTO,
   })
-  reset(@Query() query: DeviceInfoDTO): Promise<Output> {
-    return this.stk500Service.reflashFile(query.devicePort);
+  reset(@Query() query: IEquipmentDTO): Promise<Output> {
+    return this.stk500Service.reflashFile(query);
   }
 }

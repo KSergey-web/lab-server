@@ -70,9 +70,13 @@ export class Stk500Service {
       buttons,
       resistor,
       '>',
-      `COM${deviceInfo.arduinoPort}`,
+      `COM${deviceInfo.arduinoPort ?? 5}`,
     ].join(' ');
-    const res = await this.scriptQueueService.runScript(command, deviceInfo.id);
+    const res = await this.scriptQueueService.runScript(
+      command,
+      deviceInfo.id,
+      false,
+    );
     return res;
   }
 
@@ -89,12 +93,11 @@ export class Stk500Service {
     deviceInfo: IEquipmentDTO,
   ): Promise<Output> {
     await this.clean(deviceInfo);
-    const filename: string = await this.equipmentFileService.saveFile(file);
-    console.log(filename);
+    const filePath: string = await this.equipmentFileService.saveFile(file);
     const command =
       'python C:\\Scripts\\STK_prog.py' +
       ' ' +
-      filename +
+      filePath +
       ' ' +
       deviceInfo.devicePort;
     const res = await this.scriptQueueService.runScript(command, deviceInfo.id);
@@ -103,14 +106,14 @@ export class Stk500Service {
   }
 
   async reflashFile(deviceInfo: IEquipmentDTO): Promise<Output> {
-    const filename = await this.equipmentFileService.findSourceFileInWindows(
+    const filepath = await this.equipmentFileService.findSourceFileInWindows(
       'hex',
     );
-    console.log('flash file: ', filename);
+    console.log('flash file: ', filepath);
     const command =
       'python C:\\Scripts\\STK_prog.py' +
       ' ' +
-      filename +
+      filepath +
       ' ' +
       deviceInfo.devicePort;
     const res = await this.scriptQueueService.runScript(command, deviceInfo.id);

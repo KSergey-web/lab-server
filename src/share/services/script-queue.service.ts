@@ -17,7 +17,11 @@ export class ScriptQueueService {
     Observable<unknown>
   >();
 
-  async runScript(command: string, equipmentId: number): Promise<Output> {
+  async runScript(
+    command: string,
+    equipmentId: number,
+    getLogsFromFile?: boolean,
+  ): Promise<Output> {
     const equipment = this.equipmentsStoreService.getEquipment(equipmentId);
     const lastCommandExecution = this.lastCommandNotifyerMap.get(equipment);
     const commandEndNotifier = new ReplaySubject(1);
@@ -26,7 +30,10 @@ export class ScriptQueueService {
       await lastValueFrom(lastCommandExecution);
     }
     try {
-      const res = await this.equipmentFileService.runScript(command);
+      const res = await this.equipmentFileService.runScript(
+        command,
+        getLogsFromFile,
+      );
       return res;
     } finally {
       commandEndNotifier.next(true);

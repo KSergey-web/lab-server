@@ -25,10 +25,10 @@ export class EquipmentFilesService {
         `File with extension '${fileExtension}' in directory '${directoryPath}' is not found!`,
       );
     const filename = arrayfiles[0];
-    return filename;
+    return directoryPath + filename;
   }
 
-  async runScript(command: string): Promise<Output> {
+  async runScript(command: string, getLogsFromFile = true): Promise<Output> {
     const exec = util.promisify(ChildProcess.exec);
     const { stdout, stderr } = await exec(command);
     this.logResultScript(command, stdout, stderr);
@@ -37,7 +37,12 @@ export class EquipmentFilesService {
         `Some error during execution or start up a script \n stderr: ${stderr}`,
         HttpStatus.SERVICE_UNAVAILABLE,
       );
-    return await this.getLogs();
+    if (getLogsFromFile) {
+      return await this.getLogs();
+    }
+    return {
+      stdout: `выполнено: ${command}`,
+    };
   }
 
   private logResultScript(command: string, stdout: string, stderr: string) {
@@ -62,12 +67,9 @@ export class EquipmentFilesService {
     directoryPath = 'C:\\Scripts\\',
   ): Promise<string> {
     try {
-      await fs.promises.writeFile(
-        //    `C:\\inetpub\\wwwroot\\${file.originalname}`,
-        directoryPath + file.originalname,
-        file.buffer,
-      );
-      return file.originalname;
+      const filePath = directoryPath + file.originalname;
+      await fs.promises.writeFile(filePath, file.buffer);
+      return filePath;
     } catch (err) {
       throw new HttpException(
         `File ${file.originalname} was not saved.\n stderr:${

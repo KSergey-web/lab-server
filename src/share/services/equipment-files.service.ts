@@ -30,11 +30,12 @@ export class EquipmentFilesService {
 
   async runScript(command: string, getLogsFromFile = true): Promise<Output> {
     const exec = util.promisify(ChildProcess.exec);
-    const { stdout, stderr } = await exec(command);
+    const { stdout, stderr } = await exec('chcp 65001 | ' + command);
     this.logResultScript(command, stdout, stderr);
     if (stderr)
       throw new HttpException(
-        `Some error during execution or start up a script \n stderr: ${stderr}`,
+        new Date().toLocaleTimeString() +
+          ` Ошибка при запуске скрипта: ${command} ; stderr: ${stderr}`,
         HttpStatus.SERVICE_UNAVAILABLE,
       );
     if (getLogsFromFile) {

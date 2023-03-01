@@ -1,59 +1,58 @@
 import { Injectable } from '@nestjs/common';
 import { CommandHelper } from 'src/share/command-helper.class';
-import { IDeviceInfo } from 'src/share/interfaces/device-info.interface';
-import { devicePortType } from 'src/share/interfaces/device-port.type';
+import { IEquipmentDTO } from 'src/share/dto/equipment.dto';
 import { Output } from 'src/share/response/output.interface';
 import { EquipmentFilesService } from 'src/share/services/equipment-files.service';
+import { EquipmentsStoreService } from 'src/share/services/equipments-store.service';
+import { ScriptQueueService } from 'src/share/services/script-queue.service';
 import { STK500 } from './stk500.class';
 
 @Injectable()
 export class Stk500Service {
-  constructor(private readonly equipmentFileService: EquipmentFilesService) {}
+  constructor(
+    private readonly equipmentsStoreService: EquipmentsStoreService,
+    private readonly scriptQueueService: ScriptQueueService,
+    private readonly equipmentFileService: EquipmentFilesService,
+  ) {}
 
-  private devices = new Map<devicePortType, STK500>();
-
-  private setResistorMin(devicePort: devicePortType): void {
-    const device = this.checkExistAndGetDeviceByPort(devicePort);
+  private setResistorMin(equipmentId: number): void {
+    const device = this.equipmentsStoreService.getEquipment(
+      equipmentId,
+    ) as STK500;
     device.setResistorMin();
   }
 
-  private setResistorValueByComPort(
-    resistor: number,
-    devicePort: devicePortType,
-  ) {
-    const device = this.checkExistAndGetDeviceByPort(devicePort);
+  private setResistorValue(resistor: number, equipmentId: number) {
+    const device = this.equipmentsStoreService.getEquipment(
+      equipmentId,
+    ) as STK500;
     device.resistor = resistor;
   }
 
-  getResistorValueByPort(devicePort: devicePortType): number {
-    const device = this.checkExistAndGetDeviceByPort(devicePort);
+  getResistorValue(equipmentId: number): number {
+    const device = this.equipmentsStoreService.getEquipment(
+      equipmentId,
+    ) as STK500;
     return device.resistor;
   }
 
-  checkExistAndGetDeviceByPort(devicePort): STK500 {
-    const device = this.devices.get(devicePort);
-    if (device) return device;
-    const newDevice = STK500.factoryMethod();
-    this.devices.set(devicePort, newDevice);
-    return newDevice;
-  }
-
-  async changeButtonStatusByInd(ind: number, deviceInfo: IDeviceInfo) {
+  async changeButtonStatusByInd(ind: number, deviceInfo: IEquipmentDTO) {
     const buttons: string = CommandHelper.indexToCommand(ind, 8);
     return this.runPhysicalImpactScript({ buttons, deviceInfo });
   }
 
-  async changeResistorStatus(resistorValue: number, deviceInfo: IDeviceInfo) {
+  async changeResistorStatus(resistorValue: number, deviceInfo: IEquipmentDTO) {
     const resistor: string = this.valueResistorToCommand(resistorValue);
     const res = this.runPhysicalImpactScript({ resistor, deviceInfo });
-    this.setResistorValueByComPort(resistorValue, deviceInfo.devicePort);
+    this.setResistorValue(resistorValue, deviceInfo.id);
     return res;
   }
 
-  async clean(devicePort: devicePortType): Promise<Output> {
-    const command = 'python C:\\Scripts\\STK_clean.py' + ' ' + devicePort;
-    const res = await this.equipmentFileService.runScript(command);
-    this.setResistorMin(devicePort);
+  async clean(deviceInfo: IEquipmentDTO): Promise<Output> {
+    const command =
+      'python C:\\Scripts\\STK_clean.py' + ' ' + deviceInfo.devicePort;
+    const res = await this.scriptQueueService.runScript(command, deviceInfo.id);
+    this.setResistorMin(deviceInfo.id);
     return res;
   }
 
@@ -64,15 +63,20 @@ export class Stk500Service {
   }: {
     buttons?: string;
     resistor?: string;
-    deviceInfo: IDeviceInfo;
+    deviceInfo: IEquipmentDTO;
   }): Promise<Output> {
     const command = [
-      'python C:\\Scripts\\STK_but_adc.py',
+      'echo comm',
       buttons,
       resistor,
-      deviceInfo.arduinoPort,
+      '>',
+      `COM${deviceInfo.arduinoPort ?? 5}`,
     ].join(' ');
-    const res = await this.equipmentFileService.runScript(command);
+    const res = await this.scriptQueueService.runScript(
+      command,
+      deviceInfo.id,
+      false,
+    );
     return res;
   }
 
@@ -86,27 +90,34 @@ export class Stk500Service {
 
   async flashFile(
     file: Express.Multer.File,
-    devicePort: devicePortType,
+    deviceInfo: IEquipmentDTO,
   ): Promise<Output> {
-    await this.clean(devicePort);
-    const filename: string = await this.equipmentFileService.saveFile(file);
-    console.log(filename);
+    await this.clean(deviceInfo);
+    const filePath: string = await this.equipmentFileService.saveFile(file);
     const command =
-      'python C:\\Scripts\\STK_prog.py' + ' ' + filename + ' ' + devicePort;
-    const res = await this.equipmentFileService.runScript(command);
-    this.setResistorMin(devicePort);
+      'python C:\\Scripts\\STK_prog.py' +
+      ' ' +
+      filePath +
+      ' ' +
+      deviceInfo.devicePort;
+    const res = await this.scriptQueueService.runScript(command, deviceInfo.id);
+    this.setResistorMin(deviceInfo.id);
     return res;
   }
 
-  async reflashFile(devicePort: devicePortType): Promise<Output> {
-    const filename = await this.equipmentFileService.findSourceFileInWindows(
+  async reflashFile(deviceInfo: IEquipmentDTO): Promise<Output> {
+    const filepath = await this.equipmentFileService.findSourceFileInWindows(
       'hex',
     );
-    console.log('flash file: ', filename);
+    console.log('flash file: ', filepath);
     const command =
-      'python C:\\Scripts\\STK_prog.py' + ' ' + filename + ' ' + devicePort;
-    const res = await this.equipmentFileService.runScript(command);
-    this.setResistorMin(devicePort);
+      'python C:\\Scripts\\STK_prog.py' +
+      ' ' +
+      filepath +
+      ' ' +
+      deviceInfo.devicePort;
+    const res = await this.scriptQueueService.runScript(command, deviceInfo.id);
+    this.setResistorMin(deviceInfo.id);
     return res;
   }
 }

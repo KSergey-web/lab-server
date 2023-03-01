@@ -2,13 +2,13 @@ import { FactoryEquipment } from 'src/share/classes/factory.equipment.abstract';
 import { devicePortType } from 'src/share/interfaces/device-port.type';
 import { IEquipment } from 'src/share/interfaces/equipment.interface';
 
-export class STK500Factory extends FactoryEquipment {
+export class AlteraDe1SoCFactory extends FactoryEquipment {
   override createEquipment(): IEquipment {
-    return new STK500(this.equipmentData);
+    return new AlteraDe1SoC(this.equipmentData);
   }
 }
 
-export class STK500 implements IEquipment {
+export class AlteraDe1SoC implements IEquipment {
   constructor({
     id,
     devicePort,
@@ -50,17 +50,19 @@ export class STK500 implements IEquipment {
     return this._id;
   }
 
-  get resistor(): number {
-    return this._resistor;
+  private _switches: number[] = [0, 0, 0, 0, 0, 0, 0, 0];
+
+  setSwitchesToDefault(): void {
+    this._switches = [0, 0, 0, 0, 0, 0, 0, 0];
   }
 
-  set resistor(value: number) {
-    this._resistor = value;
+  get switches(): string {
+    return this._switches.join('');
   }
 
-  private _resistor = 32;
-
-  setResistorMin(): void {
-    this._resistor = 32;
+  set switches(value: string) {
+    for (let i = 0; i < value.length; ++i) {
+      if (value[i] === '1') this._switches[i] = -this._switches[i] + 1;
+    }
   }
 }

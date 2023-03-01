@@ -11,10 +11,10 @@ import { IEquipmentDTO } from 'src/share/dto/equipment.dto';
 import { IEquipment } from 'src/share/interfaces/equipment.interface';
 import { Output } from 'src/share/response/output.interface';
 import { EquipmentsStoreService } from 'src/share/services/equipments-store.service';
-import { STK500, STK500Factory } from './stk500.class';
+import { STM32, STM32Factory } from './stm32.class';
 
 @Injectable()
-export class Stk500Interceptor implements NestInterceptor {
+export class Stm32Interceptor implements NestInterceptor {
   constructor(
     private readonly equipmentsStoreService: EquipmentsStoreService,
   ) {}
@@ -22,17 +22,16 @@ export class Stk500Interceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<Output> {
     const query = context.switchToHttp().getRequest<Request>().query;
     const equipmentData = plainToClass(IEquipmentDTO, query);
-    const stk500 = this.equipmentsStoreService.resolveEquipment(
+    const stm32 = this.equipmentsStoreService.resolveEquipment(
       equipmentData.id,
       (equipment: IEquipment) =>
-        !(equipment instanceof STK500) ||
+        !(equipment instanceof STM32) ||
         equipment.arduinoPort !== equipmentData.arduinoPort ||
         equipment.devicePort !== equipmentData.devicePort,
-      new STK500Factory(equipmentData),
-    ) as STK500;
+      new STM32Factory(equipmentData),
+    ) as STM32;
     return next.handle().pipe(
       map((output) => {
-        output.resistor = stk500.resistor;
         return output;
       }),
     );

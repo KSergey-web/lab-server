@@ -1,84 +1,127 @@
 import { Injectable } from '@nestjs/common';
 import { CommandHelper } from 'src/share/command-helper.class';
+import { IEquipmentDTO } from 'src/share/dto/equipment.dto';
 import { Output } from 'src/share/response/output.interface';
 import { EquipmentFilesService } from 'src/share/services/equipment-files.service';
+import { EquipmentsStoreService } from 'src/share/services/equipments-store.service';
+import { ScriptQueueService } from 'src/share/services/script-queue.service';
+import { AlteraDe1SoC } from './altera-de1-so-c.class';
 
 @Injectable()
 export class AlteraDe1SoCService {
-  constructor(private equipmentFileService: EquipmentFilesService) {}
-  private _switches: number[] = [0, 0, 0, 0, 0, 0, 0, 0];
+  constructor(
+    private equipmentFileService: EquipmentFilesService,
+    private readonly equipmentsStoreService: EquipmentsStoreService,
+    private readonly scriptQueueService: ScriptQueueService,
+  ) {}
 
-  private setSwitchesToDefault(): void {
-    this._switches = [0, 0, 0, 0, 0, 0, 0, 0];
+  private setSwitchesToDefault(equipmentId: number): void {
+    const device = this.equipmentsStoreService.getEquipment(
+      equipmentId,
+    ) as AlteraDe1SoC;
+    device.setSwitchesToDefault();
   }
 
-  get switches(): string {
-    return this._switches.join('');
+  getSwitches(equipmentId: number): string {
+    const device = this.equipmentsStoreService.getEquipment(
+      equipmentId,
+    ) as AlteraDe1SoC;
+    return device.switches;
   }
 
-  private set switches(value: string) {
-    for (let i = 0; i < value.length; ++i) {
-      if (value[i] === '1') this._switches[i] = -this._switches[i] + 1;
-    }
+  private setSwitchesValue(switches: string, equipmentId: number): void {
+    const device = this.equipmentsStoreService.getEquipment(
+      equipmentId,
+    ) as AlteraDe1SoC;
+    device.switches = switches;
   }
 
-  async clean(): Promise<Output> {
-    const command = 'python C:\\Scripts\\FPGA_clean.py';
-    const res = await this.equipmentFileService.runScript(command);
-    this.setSwitchesToDefault();
+  async clean(deviceInfo: IEquipmentDTO): Promise<Output> {
+    const command = [
+      'python C:\\Scripts\\FPGA_clean.py',
+      deviceInfo.devicePort,
+    ].join(' ');
+    const res = await this.scriptQueueService.runScript(command, deviceInfo.id);
+    this.setSwitchesToDefault(deviceInfo.id);
     return res;
   }
 
-  async turnOffSwitches(): Promise<Output> {
-    const command = 'python C:\\Scripts\\FPGA_buttons.py cle 0 0';
-    const res = await this.equipmentFileService.runScript(command);
-    this.setSwitchesToDefault();
+  async turnOffSwitches(deviceInfo: IEquipmentDTO): Promise<Output> {
+    const command = [
+      'python C:\\Scripts\\FPGA_buttons.py cle 0 0',
+      deviceInfo.arduinoPort,
+    ].join(' ');
+    const res = await this.scriptQueueService.runScript(
+      command,
+      deviceInfo.id,
+      false,
+    );
+    this.setSwitchesToDefault(deviceInfo.id);
     return res;
   }
 
-  async changeButtonStatusByInd(ind: number) {
+  async changeButtonStatusByInd(ind: number, deviceInfo: IEquipmentDTO) {
     const buttons: string = CommandHelper.indexToCommand(ind, 4);
-    return this.runPhysicalImpactScript(undefined, buttons);
+    return this.runPhysicalImpactScript({ buttons, deviceInfo });
   }
 
-  async changeSwitchStatusByInd(ind: number) {
+  async changeSwitchStatusByInd(ind: number, deviceInfo: IEquipmentDTO) {
     const switches: string = CommandHelper.indexToCommand(ind, 8);
-    return this.runPhysicalImpactScript(switches);
+    const res = this.runPhysicalImpactScript({ switches, deviceInfo });
+    this.setSwitchesValue(switches, deviceInfo.id);
+    return res;
   }
 
-  async runPhysicalImpactScript(
-    switches: string = '00000000',
-    buttons: string = '0000',
+  async runPhysicalImpactScript({
+    switches = '00000000',
+    buttons = '0000',
+    deviceInfo,
+  }: {
+    buttons?: string;
+    switches?: string;
+    deviceInfo: IEquipmentDTO;
+  }): Promise<Output> {
+    const command = [
+      'python C:\\Scripts\\FPGA_buttons.py key',
+      switches,
+      buttons,
+      deviceInfo.arduinoPort,
+    ].join(' ');
+    const res = await this.scriptQueueService.runScript(command, deviceInfo.id);
+    return res;
+  }
+
+  async flashFile(
+    file: Express.Multer.File,
+    deviceInfo: IEquipmentDTO,
   ): Promise<Output> {
+    await this.clean(deviceInfo);
+    const filepath: string = await this.equipmentFileService.saveFile(file);
+    console.log(filepath);
     const command =
-      'python C:\\Scripts\\FPGA_buttons.py key' +
+      'python C:\\Scripts\\FPGA_prog.py' +
       ' ' +
-      switches +
+      `${filepath}` +
       ' ' +
-      buttons;
-    const res = await this.equipmentFileService.runScript(command);
-    this.switches = switches;
+      deviceInfo.devicePort;
+    const res = await this.scriptQueueService.runScript(command, deviceInfo.id);
+    this.setSwitchesToDefault(deviceInfo.id);
     return res;
   }
 
-  async flashFile(file: Express.Multer.File): Promise<Output> {
-    await this.clean();
-    const filename: string = await this.equipmentFileService.saveFile(file);
-    console.log(filename);
-    const command = 'python C:\\Scripts\\FPGA_prog.py' + ' ' + `${filename}`;
-    const res = await this.equipmentFileService.runScript(command);
-    this.setSwitchesToDefault();
-    return res;
-  }
-
-  async reflashFile(): Promise<Output> {
-    const filename = await this.equipmentFileService.findSourceFileInWindows(
+  async reflashFile(deviceInfo: IEquipmentDTO): Promise<Output> {
+    const filePath = await this.equipmentFileService.findSourceFileInWindows(
       'sof',
     );
-    console.log('flash file: ', filename);
-    const command = 'python C:\\Scripts\\FPGA_prog.py' + ' ' + `${filename}`;
-    const res = await this.equipmentFileService.runScript(command);
-    this.setSwitchesToDefault();
+    console.log('flash file: ', filePath);
+    const command =
+      'python C:\\Scripts\\FPGA_prog.py' +
+      ' ' +
+      `${filePath}` +
+      ' ' +
+      deviceInfo.devicePort;
+    const res = await this.scriptQueueService.runScript(command, deviceInfo.id);
+    this.setSwitchesToDefault(deviceInfo.id);
     return res;
   }
 }

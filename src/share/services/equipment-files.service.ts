@@ -30,7 +30,21 @@ export class EquipmentFilesService {
 
   async runScript(command: string, getLogsFromFile = true): Promise<Output> {
     const exec = util.promisify(ChildProcess.exec);
-    const { stdout, stderr } = await exec('chcp 65001 | ' + command);
+    const timeoutPromise = new Promise(
+      (resolve: (res: { stdout: string; stderr: string }) => void, reject) => {
+        setTimeout(() => {
+          resolve({
+            stderr:
+              'Error TimeOut. Нужно переподключить платы. Команды не могут быть выполнены',
+            stdout: '',
+          });
+        }, 30000);
+      },
+    );
+    const { stdout, stderr } = await Promise.race([
+      exec('chcp 65001 | ' + command),
+      timeoutPromise,
+    ]);
     this.logResultScript(command, stdout, stderr);
     if (stderr)
       throw new HttpException(
